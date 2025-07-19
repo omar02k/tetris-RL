@@ -31,8 +31,8 @@ def main():
             piece.pos[0] += 1
             time_for_gravity = 0
 
+        screen.fill((0, 0, 0))
         hard_drop = False
-
         for event in pg.event.get():
             if event.type == pg.KEYDOWN:
                 if event.key == pg.K_UP:
@@ -43,7 +43,6 @@ def main():
                     piece.rotate(dir=1, grid=grid)
             if event.type == pg.QUIT:
                 running = False
-        screen.fill((0, 0, 0))
 
         score_text = font.render(f'Lines Cleared:   {str(grid.lines_cleared)}', True, 'white')
         screen.blit(score_text, (2*WIDTH/3, HEIGHT/2))
@@ -52,7 +51,6 @@ def main():
         if keys_pressed[pg.K_DOWN]:
             time_for_gravity = 0
         piece.move(keys_pressed=keys_pressed, grid=grid)
-        # piece.draw(screen)
 
         if hard_drop:
             while not piece.is_colliding_down(grid):
@@ -69,14 +67,15 @@ def main():
         if time_for_place >= PLACE:
             piece.place(grid)
             piece = Piece(bag)
+            if piece.spawn_collision(grid):
+                running = False
 
         grid.clear_lines()
+        if grid.lines_cleared >= 40:
+            running = False
         pg.display.update()
-
     pg.quit()
 
 
 if __name__ == '__main__':
     main()
-
-# TODO: fix spawn of pieces

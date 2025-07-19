@@ -16,8 +16,10 @@ class Piece:
             for col in range(new_grid.shape[1]):
                 if (0 <= self.pos[0] + row < GRID_HEIGHT 
                     and 0 <= self.pos[1] + col < GRID_WIDTH 
+                    and new_grid[row][col]
                     and grid.grid[self.pos[0] + row][self.pos[1] + col]):
                     return
+
         self.grid = new_grid
         if self.pos[1] + self.empty_count['left'] < 0: # correct left
             self.pos[1] = -self.empty_count['left']
@@ -98,6 +100,17 @@ class Piece:
             and 0 <= self.pos[1] + col - 1 < GRID_WIDTH
             and grid.grid[self.pos[0] + row][self.pos[1] + col - 1]
             or self.pos[1] + self.empty_count['left'] <= 0
+        ]
+
+    def spawn_collision(self, grid):
+        return True in [
+            True
+            for col in range(self.size[1])
+            for row in range(self.size[0])
+            if self.grid[row][col]
+            and 0 <= self.pos[0] + row < GRID_HEIGHT
+            and 0 <= self.pos[1] + col < GRID_WIDTH
+            and grid.grid[self.pos[0] + row][self.pos[1] + col]
         ]
 
     @property
