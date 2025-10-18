@@ -28,22 +28,29 @@ class Piece:
         if self.pos[0] + self.size[0] > GRID_HEIGHT: # correct down
             self.pos[0] = -self.size[0] + GRID_HEIGHT
     
-    def move(self, keys_pressed, grid):
-        if keys_pressed:
-            self.pos[0] = (self.pos[0] + 1 if keys_pressed[pg.K_DOWN] and 
-                           not self.is_colliding_down(grid) else self.pos[0])
-            self.pos[1] = (self.pos[1] + 1 if keys_pressed[pg.K_RIGHT] and 
-                           not self.is_colliding_right(grid) else self.pos[1])
-            self.pos[1] = (self.pos[1] - 1 if keys_pressed[pg.K_LEFT] and 
-                           not self.is_colliding_left(grid) else self.pos[1])
+    def move(self, actions, grid):
+        self.pos[0] = (self.pos[0] + 1 
+                       if not self.is_colliding_down(grid) 
+                       else self.pos[0])
+        for action in actions:
+            if action == 0: # move left
+                self.pos[1] = (self.pos[1] - 1 
+                               if not self.is_colliding_left(grid) 
+                               else self.pos[1])
+            elif action == 1: # move right
+                self.pos[1] = (self.pos[1] + 1 
+                               if not self.is_colliding_right(grid) 
+                               else self.pos[1])
 
     def place(self, grid):
+        """Hard-places tetromino to grid."""
         for row in range(self.size[0]):
             for col in range(self.size[1]):
                 if self.grid[row][col]:
                     grid.grid[self.pos[0]+row][self.pos[1]+col] = self.grid[row][col]
     
     def draw(self, screen):
+        """Renders piece."""
         for row in range(self.size[0]):
             for col in range(self.size[1]):
                 if self.grid[row, col]:
@@ -56,7 +63,7 @@ class Piece:
 
     def is_colliding_down(self, grid):
         """
-        Checks whether any tile in the grid to the down of any tile in the 
+        Checks whether any tile in the grid to the bottom of any tile in the 
         piece is occupied, or if it's colliding with the edges of the board.
         """
         return True in [
@@ -103,6 +110,7 @@ class Piece:
         ]
 
     def spawn_collision(self, grid):
+        """Checks whether piece just spawned is colliding with anything."""
         return True in [
             True
             for col in range(self.size[1])

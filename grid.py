@@ -4,7 +4,7 @@ from config import *
 
 class Grid:
     def __init__(self):
-        self.grid = np.zeros((GRID_HEIGHT, GRID_WIDTH), dtype=int)
+        self.grid = np.zeros((GRID_HEIGHT, GRID_WIDTH), dtype=np.int8)
         self.lines_cleared = 0
 
     def draw(self, screen):
@@ -32,6 +32,6 @@ class Grid:
     
         for row in rows_to_clear:
             self.grid = np.delete(self.grid, row, axis=0)
-            self.grid = np.vstack([np.zeros((1, GRID_WIDTH), dtype=int), 
+            self.grid = np.vstack([np.zeros((1, GRID_WIDTH), dtype=np.int8), 
                                    self.grid])
             self.lines_cleared += 1
