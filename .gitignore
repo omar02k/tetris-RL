@@ -1,2 +1,5 @@
 venv/
 __pycache__/
+*.pyc
+models/
+tetris_tensorboard/

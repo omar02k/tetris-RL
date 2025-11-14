@@ -12,5 +12,5 @@ SHAPES = {
     'I': {'color_idx': 7, 'grid': [(0,0,0,0), (1,1,1,1), (0,0,0,0), (0,0,0,0)]},
 }
 COLORS = ['UNUSED', 'yellow', 'red', 'green', 'purple', 'orange', 'blue', 'cyan']
-# GRAVITY = 1         # Unit: frame
+# GRAVITY = 1               # Unit: frame
 FRAMES_TO_PLACE = 5         # Unit: frame

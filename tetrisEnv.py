@@ -3,8 +3,8 @@ import pygame as pg
 from config import *
 from piece import Piece
 from grid import Grid
-import gym
-from gym import spaces
+import gymnasium as gym
+from gymnasium import spaces
 
 
 class TetrisEnv(gym.Env):
@@ -21,24 +21,27 @@ class TetrisEnv(gym.Env):
 
         # observation space: full state
         self.observation_space = spaces.Box(
-            low=0, high=1, shape=(GRID_HEIGHT, GRID_WIDTH), dtype=np.int8
+            low=0, high=1, shape=(GRID_HEIGHT * GRID_WIDTH,), dtype=np.float32
         )
 
         self.reset()
 
-    def reset(self):
+    def reset(self, *, seed=None, options=None):
+        if seed is not None:
+            np.random.seed(seed)
+
         self.grid = Grid()
         self.bag = list(SHAPES.keys())
         self.piece = Piece(self.bag)
         self.time_for_place = 0
-        # return
+        return self._get_obs(), {}
 
     def step(self, action):
         # fills 7-bag when empty
         if not self.bag:
             self.bag = list(SHAPES.keys())
 
-        reward = 0
+        reward = 1 # +1 for surviving an extra timestep
         actions = []
         # handle action
         if action == 0 or action == 1:   # left and right movement
@@ -74,13 +77,13 @@ class TetrisEnv(gym.Env):
             lines_cleared_after = self.grid.lines_cleared
             # calculate reward
             lines_cleared = lines_cleared_after - lines_cleared_before
-            reward = lines_cleared
+            reward += lines_cleared * 100
             # spawn new piece
             self.piece = Piece(self.bag)
             if self.piece.spawn_collision(self.grid):
                 terminated = True
                 truncated = False
-                reward = -10
+                reward = -100
                 return self._get_obs(), reward, terminated, truncated, {}
             
         if self.screen:
@@ -97,10 +100,7 @@ class TetrisEnv(gym.Env):
             for col in range(self.piece.size[1]):
                 if self.piece.grid[row][col]:
                     obs[self.piece.pos[0] + row][self.piece.pos[1] + col] = 1
-        return obs
-    
-    def close(self):
-        pg.quit()
+        return obs.astype(np.float32).flatten()
     
     def draw(self):
         # clears screen
@@ -116,3 +116,8 @@ class TetrisEnv(gym.Env):
 
         # render tetromino piece
         self.piece.draw(self.screen)
+
+        pg.display.flip()
+
+    def close(self):
+        pg.quit()
