@@ -21,7 +21,7 @@ class TetrisEnv(gym.Env):
 
         # observation space: full state
         self.observation_space = spaces.Box(
-            low=0, high=1, shape=(GRID_HEIGHT * GRID_WIDTH,), dtype=np.float32
+            low=0, high=1, shape=(GRID_HEIGHT, GRID_WIDTH, 1), dtype=np.float32
         )
 
         self.reset()
@@ -41,7 +41,6 @@ class TetrisEnv(gym.Env):
         if not self.bag:
             self.bag = list(SHAPES.keys())
 
-        reward = 1 # +1 for surviving an extra timestep
         actions = []
         # handle action
         if action == 0 or action == 1:   # left and right movement
@@ -68,27 +67,50 @@ class TetrisEnv(gym.Env):
         else:
             self.time_for_place = 0
 
+        lines_cleared_before = self.grid.lines_cleared
+        lines_cleared_after = 0
+        lines_cleared = 0
+
+        stack_height_before = self.grid.stack_height
+        stack_height_after = 0
+        stack_height_diff = 0
+
+        hole_count_before = self.grid.hole_count
+        hole_count_after = 0
+        hole_count_diff = 0
+
         # place piece and spawn new one
         if self.time_for_place >= FRAMES_TO_PLACE:
             # place place and clear full lines
-            lines_cleared_before = self.grid.lines_cleared
             self.piece.place(self.grid)
             self.grid.clear_lines()
             lines_cleared_after = self.grid.lines_cleared
-            # calculate reward
             lines_cleared = lines_cleared_after - lines_cleared_before
-            reward += lines_cleared * 100
             # spawn new piece
             self.piece = Piece(self.bag)
-            if self.piece.spawn_collision(self.grid):
-                terminated = True
-                truncated = False
-                reward = -100
-                return self._get_obs(), reward, terminated, truncated, {}
-            
-        if self.screen:
-            self.draw()
+
+        stack_height_after = self.grid.stack_height
+        stack_height_diff = stack_height_after - stack_height_before
+
+        hole_count_after = self.grid.hole_count
+        hole_count_diff = hole_count_after - hole_count_before
         
+        if self.piece.spawn_collision(self.grid):
+            terminated = True
+            truncated = False
+            reward = -10
+            return self._get_obs(), reward, terminated, truncated, {}
+
+        # render
+        if self.screen:
+            for event in pg.event.get():
+                if event.type == pg.QUIT:
+                    self.close()
+            self.draw()
+
+        # calculate reward
+        reward = 0.01 + lines_cleared - stack_height_diff * 0.1 - hole_count_diff * 0.1
+
         # end condition
         terminated = self.grid.lines_cleared >= 40
         truncated = False
@@ -100,8 +122,8 @@ class TetrisEnv(gym.Env):
             for col in range(self.piece.size[1]):
                 if self.piece.grid[row][col]:
                     obs[self.piece.pos[0] + row][self.piece.pos[1] + col] = 1
-        return obs.astype(np.float32).flatten()
-    
+        return np.expand_dims(obs, axis=-1).astype(np.float32)
+
     def draw(self):
         # clears screen
         self.screen.fill((0, 0, 0))

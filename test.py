@@ -20,7 +20,7 @@ if __name__ == '__main__':
         obs, reward, terminated, truncated, info = env.step(action)
         done = terminated or truncated
         total_reward += reward
-        time.sleep(0.05)  # slows down rendering for visibility
+        time.sleep(0.05)
     
     print(f"Episode finished with total reward: {total_reward}")
     env.close()

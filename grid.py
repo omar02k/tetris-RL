@@ -35,3 +35,20 @@ class Grid:
             self.grid = np.vstack([np.zeros((1, GRID_WIDTH), dtype=np.int8), 
                                    self.grid])
             self.lines_cleared += 1
+
+    @property
+    def stack_height(self):
+        for row in range(GRID_HEIGHT):
+            if any(self.grid[row]):
+                return (GRID_HEIGHT - row)
+        return 0
+
+    @property
+    def hole_count(self):
+        hole_count = 0
+        for col in range(GRID_WIDTH):
+            column = self.grid[:, col]  # all rows in this column
+            if np.any(column != 0):
+                first_nonzero_idx = np.argmax(column != 0)
+                hole_count += np.sum(column[first_nonzero_idx+1:] == 0)
+        return hole_count

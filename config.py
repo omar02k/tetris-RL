@@ -13,4 +13,4 @@ SHAPES = {
 }
 COLORS = ['UNUSED', 'yellow', 'red', 'green', 'purple', 'orange', 'blue', 'cyan']
 # GRAVITY = 1               # Unit: frame
-FRAMES_TO_PLACE = 5         # Unit: frame
+FRAMES_TO_PLACE = 1         # Unit: frame
